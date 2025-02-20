@@ -1,0 +1,12 @@
+services:
+  api:
+    address: "localhost:7300"
+  account:
+    address: "localhost:7301"
+database:
+  dsn: "port=5445 host=localhost user=user dbname=flame password=123456 sslmode=disable"
+auth:
+  jwt: "token*jwt-!gh"
+public:
+  host : "localhost"
+  port :  8080

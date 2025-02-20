@@ -1,0 +1,36 @@
+syntax = "proto3";
+
+option go_package = "flame/pkg/pb";
+
+service Account{
+  rpc Register(RegisterReq) returns (RegisterRes);
+  rpc Login(LoginReq) returns (LoginRes);
+  rpc GetTokens(GetTokensReq) returns (GetTokensRes);
+}
+
+message RegisterReq{
+  string Email = 1;
+  string Password = 2;
+  string Name = 3;
+  string Gender = 4;
+  string LookingFor = 5;
+}
+message RegisterRes{
+  string AccessToken = 1 [json_name = "access_token"];
+  string RefreshToken = 2;
+}
+message LoginReq{
+  string Email = 1;
+  string Password = 2;
+}
+message LoginRes{
+  string AccessToken = 1 [json_name = "access_token"];
+  string RefreshToken = 2 [json_name = "refresh_token"];
+}
+message GetTokensReq{
+  int64 Id = 1;
+}
+message GetTokensRes{
+  string AccessToken = 1 [json_name = "access_token"];
+  string RefreshToken = 2 [json_name = "refresh_token"];
+}
