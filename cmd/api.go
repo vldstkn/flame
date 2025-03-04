@@ -1,8 +1,8 @@
 package main
 
 import (
-	"flame/internal/api"
 	"flame/internal/config"
+	"flame/internal/services/api"
 	"flame/pkg/logger"
 	"log/slog"
 	"os"
@@ -13,7 +13,7 @@ func main() {
 	if mode == "" {
 		mode = "dev"
 	}
-	conf := config.LoadConfig("./configs", mode)
+	conf := config.LoadConfig("configs", mode)
 	log := logger.NewLogger(os.Stdout)
 	app := api.NewApp(&api.AppDeps{
 		Config: conf,

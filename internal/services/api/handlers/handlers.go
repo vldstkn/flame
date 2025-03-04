@@ -14,7 +14,7 @@ type HandlersDeps struct {
 }
 
 func InitHandlers(router chi.Router, deps *HandlersDeps) {
-	NewAccountHAndler(router, &AccountHandlerDeps{
+	NewAccountHandler(router, &AccountHandlerDeps{
 		Logger:     deps.Logger,
 		Config:     deps.Config,
 		ApiService: deps.ApiService,

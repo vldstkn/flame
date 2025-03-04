@@ -4,7 +4,6 @@ import (
 	"context"
 	"flame/internal/config"
 	"flame/internal/interfaces"
-	"flame/internal/models"
 	"flame/pkg/jwt"
 	"flame/pkg/pb"
 	"log/slog"
@@ -33,11 +32,9 @@ func NewHandler(deps *HandlerDeps) *Handler {
 
 func (handler *Handler) Register(ctx context.Context, r *pb.RegisterReq) (*pb.RegisterRes, error) {
 	id, err := handler.Service.Register(&interfaces.AccountSRegisterDeps{
-		Name:       r.Name,
-		Password:   r.Password,
-		Email:      r.Email,
-		Gender:     models.Gender(r.Gender),
-		LookingFor: models.Gender(r.LookingFor),
+		Name:     r.Name,
+		Password: r.Password,
+		Email:    r.Email,
 	})
 	if err != nil {
 		return nil, err
@@ -70,7 +67,9 @@ func (handler *Handler) Login(ctx context.Context, r *pb.LoginReq) (*pb.LoginRes
 	}, nil
 }
 func (handler *Handler) GetTokens(ctx context.Context, r *pb.GetTokensReq) (*pb.GetTokensRes, error) {
-	tokens, err := handler.Service.GetTokens(r.Id, handler.Config.Auth.Jwt)
+	tokens, err := handler.Service.GetTokens(handler.Config.Auth.Jwt, jwt.Data{
+		Id: r.Id,
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -78,5 +77,36 @@ func (handler *Handler) GetTokens(ctx context.Context, r *pb.GetTokensReq) (*pb.
 	return &pb.GetTokensRes{
 		AccessToken:  tokens.AccessToken,
 		RefreshToken: tokens.RefreshToken,
+	}, nil
+}
+
+func (handler *Handler) UpdateProfile(ctx context.Context, r *pb.UpdateProfileReq) (*pb.UpdateProfileRes, error) {
+	err := handler.Service.UpdateProfile(r)
+	if err != nil {
+		return nil, err
+	}
+	return &pb.UpdateProfileRes{}, nil
+}
+
+func (handler *Handler) GetProfile(ctx context.Context, r *pb.GetProfileReq) (*pb.GetProfileRes, error) {
+	response, err := handler.Service.GetProfile(r.Id)
+	return response, err
+}
+
+func (handler *Handler) UploadPhoto(ctx context.Context, r *pb.UploadPhotoReq) (*pb.UploadPhotoRes, error) {
+	err := handler.Service.UploadPhoto(r.UserId, r.LinkPhoto)
+	if err != nil {
+		return nil, err
+	}
+	return &pb.UploadPhotoRes{}, nil
+}
+
+func (handler *Handler) DeletePhoto(ctx context.Context, r *pb.DeletePhotoReq) (*pb.DeletePhotoRes, error) {
+	url, err := handler.Service.DeletePhoto(r.UserId, r.PhotoId)
+	if err != nil {
+		return nil, err
+	}
+	return &pb.DeletePhotoRes{
+		PhotoUrl: url,
 	}, nil
 }

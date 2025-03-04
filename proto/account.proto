@@ -6,14 +6,33 @@ service Account{
   rpc Register(RegisterReq) returns (RegisterRes);
   rpc Login(LoginReq) returns (LoginRes);
   rpc GetTokens(GetTokensReq) returns (GetTokensRes);
+  rpc UpdateProfile(UpdateProfileReq) returns (UpdateProfileRes);
+  rpc GetProfile(GetProfileReq) returns (GetProfileRes);
+  rpc UploadPhoto(UploadPhotoReq) returns (UploadPhotoRes);
+  rpc DeletePhoto(DeletePhotoReq) returns (DeletePhotoRes);
+}
+
+message UserProfile {
+  int64 Id = 1 [json_name = "id"];
+  string Name = 2 [json_name = "name"];
+  optional string BirthDate = 3 [json_name = "birth_date"];
+  optional string City = 4 [json_name = "city"];
+  optional string Bio = 5 [json_name = "bio"];
+  optional string Gender = 6 [json_name = "gender"];
+  repeated UserPhoto photos = 7 [json_name = "photos"];
+}
+message UserPhoto {
+  int64 Id = 1 [json_name = "id"];
+  optional string UploadedAt = 2 [json_name = "uploaded_at"];
+  optional int64 UserId = 3[json_name = "user_id"];
+  string PhotoUrl = 4[json_name = "photo_url"];
+  optional bool IsMain = 5[json_name = "is_main"];
 }
 
 message RegisterReq{
   string Email = 1;
   string Password = 2;
   string Name = 3;
-  string Gender = 4;
-  string LookingFor = 5;
 }
 message RegisterRes{
   string AccessToken = 1 [json_name = "access_token"];
@@ -33,4 +52,36 @@ message GetTokensReq{
 message GetTokensRes{
   string AccessToken = 1 [json_name = "access_token"];
   string RefreshToken = 2 [json_name = "refresh_token"];
+}
+
+message UpdateProfileReq{
+  int64 Id = 1;
+  optional string Name = 2;
+  optional string BirthDate = 3;
+  optional string City = 4;
+  optional string Bio = 5;
+  optional string Gender = 6;
+}
+message UpdateProfileRes{
+}
+
+message GetProfileReq{
+  int64 Id = 1;
+}
+message GetProfileRes{
+  UserProfile profile = 1 [json_name="profile"];
+}
+message UploadPhotoReq{
+  int64 UserId = 1;
+  string LinkPhoto = 2;
+}
+message UploadPhotoRes{
+}
+
+message DeletePhotoReq{
+  int64 PhotoId = 1;
+  int64 UserId = 2;
+}
+message DeletePhotoRes{
+  string PhotoUrl = 1;
 }

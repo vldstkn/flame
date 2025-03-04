@@ -19,9 +19,13 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	Account_Register_FullMethodName  = "/Account/Register"
-	Account_Login_FullMethodName     = "/Account/Login"
-	Account_GetTokens_FullMethodName = "/Account/GetTokens"
+	Account_Register_FullMethodName      = "/Account/Register"
+	Account_Login_FullMethodName         = "/Account/Login"
+	Account_GetTokens_FullMethodName     = "/Account/GetTokens"
+	Account_UpdateProfile_FullMethodName = "/Account/UpdateProfile"
+	Account_GetProfile_FullMethodName    = "/Account/GetProfile"
+	Account_UploadPhoto_FullMethodName   = "/Account/UploadPhoto"
+	Account_DeletePhoto_FullMethodName   = "/Account/DeletePhoto"
 )
 
 // AccountClient is the client API for Account service.
@@ -31,6 +35,10 @@ type AccountClient interface {
 	Register(ctx context.Context, in *RegisterReq, opts ...grpc.CallOption) (*RegisterRes, error)
 	Login(ctx context.Context, in *LoginReq, opts ...grpc.CallOption) (*LoginRes, error)
 	GetTokens(ctx context.Context, in *GetTokensReq, opts ...grpc.CallOption) (*GetTokensRes, error)
+	UpdateProfile(ctx context.Context, in *UpdateProfileReq, opts ...grpc.CallOption) (*UpdateProfileRes, error)
+	GetProfile(ctx context.Context, in *GetProfileReq, opts ...grpc.CallOption) (*GetProfileRes, error)
+	UploadPhoto(ctx context.Context, in *UploadPhotoReq, opts ...grpc.CallOption) (*UploadPhotoRes, error)
+	DeletePhoto(ctx context.Context, in *DeletePhotoReq, opts ...grpc.CallOption) (*DeletePhotoRes, error)
 }
 
 type accountClient struct {
@@ -71,6 +79,46 @@ func (c *accountClient) GetTokens(ctx context.Context, in *GetTokensReq, opts ..
 	return out, nil
 }
 
+func (c *accountClient) UpdateProfile(ctx context.Context, in *UpdateProfileReq, opts ...grpc.CallOption) (*UpdateProfileRes, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(UpdateProfileRes)
+	err := c.cc.Invoke(ctx, Account_UpdateProfile_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *accountClient) GetProfile(ctx context.Context, in *GetProfileReq, opts ...grpc.CallOption) (*GetProfileRes, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetProfileRes)
+	err := c.cc.Invoke(ctx, Account_GetProfile_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *accountClient) UploadPhoto(ctx context.Context, in *UploadPhotoReq, opts ...grpc.CallOption) (*UploadPhotoRes, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(UploadPhotoRes)
+	err := c.cc.Invoke(ctx, Account_UploadPhoto_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *accountClient) DeletePhoto(ctx context.Context, in *DeletePhotoReq, opts ...grpc.CallOption) (*DeletePhotoRes, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(DeletePhotoRes)
+	err := c.cc.Invoke(ctx, Account_DeletePhoto_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // AccountServer is the server API for Account service.
 // All implementations must embed UnimplementedAccountServer
 // for forward compatibility.
@@ -78,6 +126,10 @@ type AccountServer interface {
 	Register(context.Context, *RegisterReq) (*RegisterRes, error)
 	Login(context.Context, *LoginReq) (*LoginRes, error)
 	GetTokens(context.Context, *GetTokensReq) (*GetTokensRes, error)
+	UpdateProfile(context.Context, *UpdateProfileReq) (*UpdateProfileRes, error)
+	GetProfile(context.Context, *GetProfileReq) (*GetProfileRes, error)
+	UploadPhoto(context.Context, *UploadPhotoReq) (*UploadPhotoRes, error)
+	DeletePhoto(context.Context, *DeletePhotoReq) (*DeletePhotoRes, error)
 	mustEmbedUnimplementedAccountServer()
 }
 
@@ -96,6 +148,18 @@ func (UnimplementedAccountServer) Login(context.Context, *LoginReq) (*LoginRes, 
 }
 func (UnimplementedAccountServer) GetTokens(context.Context, *GetTokensReq) (*GetTokensRes, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetTokens not implemented")
+}
+func (UnimplementedAccountServer) UpdateProfile(context.Context, *UpdateProfileReq) (*UpdateProfileRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateProfile not implemented")
+}
+func (UnimplementedAccountServer) GetProfile(context.Context, *GetProfileReq) (*GetProfileRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetProfile not implemented")
+}
+func (UnimplementedAccountServer) UploadPhoto(context.Context, *UploadPhotoReq) (*UploadPhotoRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UploadPhoto not implemented")
+}
+func (UnimplementedAccountServer) DeletePhoto(context.Context, *DeletePhotoReq) (*DeletePhotoRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeletePhoto not implemented")
 }
 func (UnimplementedAccountServer) mustEmbedUnimplementedAccountServer() {}
 func (UnimplementedAccountServer) testEmbeddedByValue()                 {}
@@ -172,6 +236,78 @@ func _Account_GetTokens_Handler(srv interface{}, ctx context.Context, dec func(i
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Account_UpdateProfile_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateProfileReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AccountServer).UpdateProfile(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Account_UpdateProfile_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AccountServer).UpdateProfile(ctx, req.(*UpdateProfileReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Account_GetProfile_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetProfileReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AccountServer).GetProfile(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Account_GetProfile_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AccountServer).GetProfile(ctx, req.(*GetProfileReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Account_UploadPhoto_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UploadPhotoReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AccountServer).UploadPhoto(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Account_UploadPhoto_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AccountServer).UploadPhoto(ctx, req.(*UploadPhotoReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Account_DeletePhoto_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeletePhotoReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AccountServer).DeletePhoto(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Account_DeletePhoto_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AccountServer).DeletePhoto(ctx, req.(*DeletePhotoReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Account_ServiceDesc is the grpc.ServiceDesc for Account service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -190,6 +326,22 @@ var Account_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetTokens",
 			Handler:    _Account_GetTokens_Handler,
+		},
+		{
+			MethodName: "UpdateProfile",
+			Handler:    _Account_UpdateProfile_Handler,
+		},
+		{
+			MethodName: "GetProfile",
+			Handler:    _Account_GetProfile_Handler,
+		},
+		{
+			MethodName: "UploadPhoto",
+			Handler:    _Account_UploadPhoto_Handler,
+		},
+		{
+			MethodName: "DeletePhoto",
+			Handler:    _Account_DeletePhoto_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

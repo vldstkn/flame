@@ -1,8 +1,8 @@
 package api
 
 import (
-	api "flame/internal/api/handlers"
 	"flame/internal/config"
+	"flame/internal/services/api/handlers"
 	"github.com/go-chi/chi/v5"
 	"log/slog"
 	"net/http"

@@ -4,7 +4,7 @@ services:
   account:
     address: "localhost:7301"
 database:
-  dsn: "port=5445 host=localhost user=user dbname=flame password=123456 sslmode=disable"
+  dsn: "port=5445 host=localhost user=user dbname=test password=123456 sslmode=disable"
 auth:
   jwt: "token*jwt-!gh"
 public:

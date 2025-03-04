@@ -28,6 +28,10 @@ type Config struct {
 			Port int    `yaml:"port"`
 		} `yaml:"database"`
 	} `yaml:"public"`
+	S3 struct {
+		Bucket   string `yaml:"bucket"`
+		Endpoint string `yaml:"endpoint"`
+	} `yaml:"s3"`
 }
 
 func LoadConfig(path, mode string) *Config {
