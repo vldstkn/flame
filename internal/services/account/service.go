@@ -7,6 +7,7 @@ import (
 	http_errors "flame/pkg/errors"
 	"flame/pkg/jwt"
 	"flame/pkg/pb"
+	"fmt"
 	"golang.org/x/crypto/bcrypt"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -48,10 +49,16 @@ func (service *Service) IssueToken(secret string, data jwt.Data) (*interfaces.Ac
 		RefreshToken: refreshToken,
 	}, nil
 }
-func (service *Service) Login(email, password string) (int64, error) {
+func (service *Service) Login(email, password, location string) (int64, error) {
 	user := service.Repository.GetByEmail(email)
 	if user == nil {
 		return -1, status.Errorf(codes.InvalidArgument, http_errors.InvalidNameOrPassword)
+	}
+	if location != "" {
+		u := &models.User{
+			Location: getLocation(location),
+		}
+		service.Repository.UpdateProfile(u)
 	}
 	err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
 	if err != nil {
@@ -74,10 +81,12 @@ func (service *Service) Register(data *interfaces.AccountSRegisterDeps) (int64, 
 		)
 		return -1, status.Errorf(codes.Internal, http.StatusText(http.StatusInternalServerError))
 	}
+	loc := getLocation(data.Location)
 	user := &models.User{
 		Email:    data.Email,
 		Password: string(hashPassword),
 		Name:     data.Name,
+		Location: loc,
 	}
 	id, err := service.Repository.Create(user)
 	if err != nil {
@@ -212,4 +221,21 @@ func (service *Service) DeletePhoto(userId, photoId int64) (string, error) {
 		service.Repository.SetMainPhoto(userId, lastPhoto.Id)
 	}
 	return photo.PhotoUrl, nil
+}
+
+func (service *Service) GetMatchingUsers(userId int64, location string) ([]models.GetMatchingUser, error) {
+	users, err := service.Repository.GetMatchingUsers(userId)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, http.StatusText(http.StatusInternalServerError))
+	}
+	return users, nil
+}
+
+func getLocation(loc string) *string {
+	if loc == "" {
+		return nil
+	} else {
+		l := fmt.Sprintf("SRID=4326;POINT%s", loc)
+		return &l
+	}
 }

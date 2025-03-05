@@ -4,6 +4,7 @@ type AccountRegisterReq struct {
 	Name     string `json:"name" validate:"required,min=2,max=50"`
 	Email    string `json:"email" validate:"required,email"`
 	Password string `json:"password" validate:"required,min=6,max=50"`
+	Location string `json:"location,omitempty"`
 }
 
 type AccountRegisterRes struct {
@@ -13,6 +14,7 @@ type AccountRegisterRes struct {
 type AccountLoginReq struct {
 	Email    string `json:"email" validate:"required,email"`
 	Password string `json:"password" validate:"required,min=6,max=50"`
+	Location string `json:"location,omitempty"`
 }
 
 type AccountLoginRes struct {
@@ -33,4 +35,8 @@ type AccountUpdateProfileReq struct {
 
 type DeletePhotoReq struct {
 	PhotoId int64 `json:"photo_id" validate:"required,min=0,numeric"`
+}
+
+type GetMatchingReq struct {
+	Location string `json:"location" validate:"required"`
 }

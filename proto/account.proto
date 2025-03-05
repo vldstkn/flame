@@ -10,6 +10,7 @@ service Account{
   rpc GetProfile(GetProfileReq) returns (GetProfileRes);
   rpc UploadPhoto(UploadPhotoReq) returns (UploadPhotoRes);
   rpc DeletePhoto(DeletePhotoReq) returns (DeletePhotoRes);
+  rpc GetMatchingUsers(GetMatchingUsersReq) returns (GetMatchingUsersRes);
 }
 
 message UserProfile {
@@ -33,6 +34,7 @@ message RegisterReq{
   string Email = 1;
   string Password = 2;
   string Name = 3;
+  string Location = 4;
 }
 message RegisterRes{
   string AccessToken = 1 [json_name = "access_token"];
@@ -41,6 +43,7 @@ message RegisterRes{
 message LoginReq{
   string Email = 1;
   string Password = 2;
+  string Location = 4;
 }
 message LoginRes{
   string AccessToken = 1 [json_name = "access_token"];
@@ -84,4 +87,12 @@ message DeletePhotoReq{
 }
 message DeletePhotoRes{
   string PhotoUrl = 1;
+}
+
+message GetMatchingUsersReq{
+  int64 Id = 1;
+  string Location = 2;
+}
+message GetMatchingUsersRes{
+  repeated UserProfile users = 1;
 }

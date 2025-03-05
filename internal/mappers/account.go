@@ -24,3 +24,25 @@ func FromModelPhotosToGrpc(photos []models.UserPhoto) []*pb.UserPhoto {
 	}
 	return res
 }
+
+func FromModelGetMatchingUserToGrpc(user models.GetMatchingUser) *pb.UserProfile {
+	return &pb.UserProfile{
+		Id:        user.Id,
+		Name:      user.Name,
+		BirthDate: user.BirthDate,
+		City:      user.City,
+		Bio:       user.Bio,
+		Gender:    user.Gender,
+		Photos:    []*pb.UserPhoto{FromModelPhotoToGrpc(user.Photo)},
+	}
+}
+func FromModelGetMatchingUsersToGrpc(users []models.GetMatchingUser) []*pb.UserProfile {
+	res := make([]*pb.UserProfile, len(users))
+	if res == nil {
+		return nil
+	}
+	for i, u := range users {
+		res[i] = FromModelGetMatchingUserToGrpc(u)
+	}
+	return res
+}

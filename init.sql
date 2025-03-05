@@ -1,3 +1,5 @@
+CREATE EXTENSION postgis;
+
 CREATE TYPE user_gender AS ENUM ('male', 'female');
 CREATE TABLE users(
     id BIGSERIAL PRIMARY KEY,
@@ -9,9 +11,10 @@ CREATE TABLE users(
     birth_date DATE,
     city TEXT,
     gender user_gender,
-    bio TEXT
+    bio TEXT,
+    location geography(Point, 4326)
 );
-drop table users;
+CREATE INDEX idx_users_location ON users USING GIST (location);
 CREATE TABLE user_photos(
     id BIGSERIAL PRIMARY KEY,
     uploaded_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
@@ -19,3 +22,11 @@ CREATE TABLE user_photos(
     photo_url TEXT NOT NULL,
     is_main boolean DEFAULT FALSE
 );
+
+CREATE TABLE preferences(
+    user_id BIGINT PRIMARY KEY REFERENCES users(id),
+    distance INT NOT NULL DEFAULT 100,
+    age INT,
+    gender user_gender,
+    city TEXT
+)

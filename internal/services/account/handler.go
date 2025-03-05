@@ -4,6 +4,7 @@ import (
 	"context"
 	"flame/internal/config"
 	"flame/internal/interfaces"
+	"flame/internal/mappers"
 	"flame/pkg/jwt"
 	"flame/pkg/pb"
 	"log/slog"
@@ -35,6 +36,7 @@ func (handler *Handler) Register(ctx context.Context, r *pb.RegisterReq) (*pb.Re
 		Name:     r.Name,
 		Password: r.Password,
 		Email:    r.Email,
+		Location: r.Location,
 	})
 	if err != nil {
 		return nil, err
@@ -51,7 +53,7 @@ func (handler *Handler) Register(ctx context.Context, r *pb.RegisterReq) (*pb.Re
 	}, nil
 }
 func (handler *Handler) Login(ctx context.Context, r *pb.LoginReq) (*pb.LoginRes, error) {
-	id, err := handler.Service.Login(r.Email, r.Password)
+	id, err := handler.Service.Login(r.Email, r.Password, r.Location)
 	if err != nil {
 		return nil, err
 	}
@@ -108,5 +110,15 @@ func (handler *Handler) DeletePhoto(ctx context.Context, r *pb.DeletePhotoReq) (
 	}
 	return &pb.DeletePhotoRes{
 		PhotoUrl: url,
+	}, nil
+}
+
+func (handler *Handler) GetMatchingUsers(ctx context.Context, r *pb.GetMatchingUsersReq) (*pb.GetMatchingUsersRes, error) {
+	users, err := handler.Service.GetMatchingUsers(r.Id, r.Location)
+	if err != nil {
+		return nil, err
+	}
+	return &pb.GetMatchingUsersRes{
+		Users: mappers.FromModelGetMatchingUsersToGrpc(users),
 	}, nil
 }

@@ -92,6 +92,7 @@ func (handler *AccountHandler) Register() http.HandlerFunc {
 			Email:    body.Email,
 			Password: body.Password,
 			Name:     body.Name,
+			Location: body.Location,
 		})
 		if err != nil {
 			msg, code := http_errors.HandleError(err)
@@ -118,6 +119,7 @@ func (handler *AccountHandler) Login() http.HandlerFunc {
 		response, err := handler.AccountClient.Login(context.Background(), &pb.LoginReq{
 			Email:    body.Email,
 			Password: body.Password,
+			Location: body.Location,
 		})
 		if err != nil {
 			msg, code := http_errors.HandleError(err)
@@ -175,7 +177,6 @@ func (handler *AccountHandler) UpdateProfile() http.HandlerFunc {
 			return
 		}
 		authData := r.Context().Value("authData").(middleware.AuthData)
-
 		_, err = handler.AccountClient.UpdateProfile(context.Background(), &pb.UpdateProfileReq{
 			Id:        authData.Id,
 			Name:      body.Name,
@@ -250,7 +251,6 @@ func (handler *AccountHandler) UploadPhoto() http.HandlerFunc {
 			Body:   file,
 		})
 		if err != nil {
-			fmt.Println(err)
 			res.Json(w, dto.ErrorRes{
 				Error: http.StatusText(http.StatusBadRequest),
 			}, http.StatusBadRequest)
@@ -308,5 +308,40 @@ func (handler *AccountHandler) DeletePhoto() http.HandlerFunc {
 			return
 		}
 		res.Json(w, nil, http.StatusOK)
+	}
+}
+
+func (handler *AccountHandler) getMatchingUsers() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		id := r.Context().Value("authData").(middleware.AuthData).Id
+		body, err := req.HandleBody[dto.GetMatchingReq](r)
+		if err != nil {
+			res.Json(w, dto.ErrorRes{
+				Error: http.StatusText(http.StatusBadRequest),
+			}, http.StatusBadRequest)
+			return
+		}
+		response, err := handler.AccountClient.GetMatchingUsers(context.Background(), &pb.GetMatchingUsersReq{
+			Id:       id,
+			Location: body.Location,
+		})
+		if err != nil {
+			mes, code := http_errors.HandleError(err)
+			res.Json(w, dto.ErrorRes{
+				Error: mes,
+			}, code)
+			return
+		}
+		opts := protojson.MarshalOptions{
+			EmitUnpopulated: true,
+		}
+		data, err := opts.Marshal(response)
+		if err != nil {
+			res.Json(w, dto.ErrorRes{
+				Error: http.StatusText(http.StatusInternalServerError),
+			}, http.StatusInternalServerError)
+			return
+		}
+		res.ProtoJson(w, data, http.StatusOK)
 	}
 }

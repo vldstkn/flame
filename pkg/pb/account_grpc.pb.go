@@ -19,13 +19,14 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	Account_Register_FullMethodName      = "/Account/Register"
-	Account_Login_FullMethodName         = "/Account/Login"
-	Account_GetTokens_FullMethodName     = "/Account/GetTokens"
-	Account_UpdateProfile_FullMethodName = "/Account/UpdateProfile"
-	Account_GetProfile_FullMethodName    = "/Account/GetProfile"
-	Account_UploadPhoto_FullMethodName   = "/Account/UploadPhoto"
-	Account_DeletePhoto_FullMethodName   = "/Account/DeletePhoto"
+	Account_Register_FullMethodName         = "/Account/Register"
+	Account_Login_FullMethodName            = "/Account/Login"
+	Account_GetTokens_FullMethodName        = "/Account/GetTokens"
+	Account_UpdateProfile_FullMethodName    = "/Account/UpdateProfile"
+	Account_GetProfile_FullMethodName       = "/Account/GetProfile"
+	Account_UploadPhoto_FullMethodName      = "/Account/UploadPhoto"
+	Account_DeletePhoto_FullMethodName      = "/Account/DeletePhoto"
+	Account_GetMatchingUsers_FullMethodName = "/Account/GetMatchingUsers"
 )
 
 // AccountClient is the client API for Account service.
@@ -39,6 +40,7 @@ type AccountClient interface {
 	GetProfile(ctx context.Context, in *GetProfileReq, opts ...grpc.CallOption) (*GetProfileRes, error)
 	UploadPhoto(ctx context.Context, in *UploadPhotoReq, opts ...grpc.CallOption) (*UploadPhotoRes, error)
 	DeletePhoto(ctx context.Context, in *DeletePhotoReq, opts ...grpc.CallOption) (*DeletePhotoRes, error)
+	GetMatchingUsers(ctx context.Context, in *GetMatchingUsersReq, opts ...grpc.CallOption) (*GetMatchingUsersRes, error)
 }
 
 type accountClient struct {
@@ -119,6 +121,16 @@ func (c *accountClient) DeletePhoto(ctx context.Context, in *DeletePhotoReq, opt
 	return out, nil
 }
 
+func (c *accountClient) GetMatchingUsers(ctx context.Context, in *GetMatchingUsersReq, opts ...grpc.CallOption) (*GetMatchingUsersRes, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetMatchingUsersRes)
+	err := c.cc.Invoke(ctx, Account_GetMatchingUsers_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // AccountServer is the server API for Account service.
 // All implementations must embed UnimplementedAccountServer
 // for forward compatibility.
@@ -130,6 +142,7 @@ type AccountServer interface {
 	GetProfile(context.Context, *GetProfileReq) (*GetProfileRes, error)
 	UploadPhoto(context.Context, *UploadPhotoReq) (*UploadPhotoRes, error)
 	DeletePhoto(context.Context, *DeletePhotoReq) (*DeletePhotoRes, error)
+	GetMatchingUsers(context.Context, *GetMatchingUsersReq) (*GetMatchingUsersRes, error)
 	mustEmbedUnimplementedAccountServer()
 }
 
@@ -160,6 +173,9 @@ func (UnimplementedAccountServer) UploadPhoto(context.Context, *UploadPhotoReq) 
 }
 func (UnimplementedAccountServer) DeletePhoto(context.Context, *DeletePhotoReq) (*DeletePhotoRes, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeletePhoto not implemented")
+}
+func (UnimplementedAccountServer) GetMatchingUsers(context.Context, *GetMatchingUsersReq) (*GetMatchingUsersRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetMatchingUsers not implemented")
 }
 func (UnimplementedAccountServer) mustEmbedUnimplementedAccountServer() {}
 func (UnimplementedAccountServer) testEmbeddedByValue()                 {}
@@ -308,6 +324,24 @@ func _Account_DeletePhoto_Handler(srv interface{}, ctx context.Context, dec func
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Account_GetMatchingUsers_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetMatchingUsersReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AccountServer).GetMatchingUsers(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Account_GetMatchingUsers_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AccountServer).GetMatchingUsers(ctx, req.(*GetMatchingUsersReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Account_ServiceDesc is the grpc.ServiceDesc for Account service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -342,6 +376,10 @@ var Account_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DeletePhoto",
 			Handler:    _Account_DeletePhoto_Handler,
+		},
+		{
+			MethodName: "GetMatchingUsers",
+			Handler:    _Account_GetMatchingUsers_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

@@ -35,12 +35,23 @@ func (repo *Repository) GetByEmail(email string) *models.User {
 }
 func (repo *Repository) Create(user *models.User) (int64, error) {
 	var id int64
-	row, err := repo.DB.NamedQuery(`INSERT INTO users (email, password, name) 
-																   VALUES (:email,:password,:name) RETURNING id`, user)
+	tr, err := repo.DB.Beginx()
 	if err != nil {
 		return -1, err
 	}
-	row.Scan(&id)
+	err = repo.DB.QueryRow(`INSERT INTO users (email, password, name, location) 
+																   VALUES ($1,$2,$3, ST_GeographyFromText($4)) RETURNING id`,
+		user.Email, user.Password, user.Name, user.Location).Scan(&id)
+	if err != nil {
+		tr.Rollback()
+		return -1, err
+	}
+	_, err = repo.DB.Exec(`INSERT INTO preferences (user_id) VALUES ($1)`, id)
+	if err != nil {
+		tr.Rollback()
+		return -1, err
+	}
+	tr.Commit()
 	return id, nil
 }
 
@@ -53,7 +64,7 @@ func (repo *Repository) UpdateProfile(user *models.User) error {
 
 	val := reflect.ValueOf(*user)
 	typ := reflect.TypeOf(*user)
-
+	fmt.Println(user.Location)
 	for i := 0; i < val.NumField(); i++ {
 		fieldType := typ.Field(i)
 		fieldValue := val.Field(i)
@@ -157,4 +168,8 @@ func (repo *Repository) GetLastUserPhoto(userId int64) *models.UserPhoto {
 	}
 
 	return &photo
+}
+
+func (repo *Repository) GetMatchingUsers(userId int64) ([]models.GetMatchingUser, error) {
+	return nil, nil
 }
