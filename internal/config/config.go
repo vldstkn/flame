@@ -11,11 +11,25 @@ type Service struct {
 
 type Config struct {
 	Services struct {
-		Api     Service `yaml:"api"`
-		Account Service `yaml:"account"`
+		Api      Service `yaml:"api"`
+		Account  Service `yaml:"account"`
+		Matching Service `yaml:"matching"`
+		Swipes   Service `yaml:"swipes"`
 	} `yaml:"services"`
 	Database struct {
-		Dsn string `yaml:"dsn"`
+		Account struct {
+			Dsn string `yaml:"dsn"`
+		} `yaml:"account"`
+		Swipes struct {
+			Dsn string `yaml:"dsn"`
+		} `yaml:"swipes"`
+		Redis struct {
+			Host     string `yaml:"host"`
+			Port     string `yaml:"port"`
+			Password string `yaml:"password"`
+			Username string `yaml:"username"`
+			Db       int    `yaml:"db"`
+		} `yaml:"redis"`
 	} `yaml:"database"`
 	Auth struct {
 		Jwt string `yaml:"jwt"`
@@ -39,11 +53,15 @@ func LoadConfig(path, mode string) *Config {
 	viper.SetConfigType("yaml")
 	viper.AddConfigPath(path)
 	if err := viper.ReadInConfig(); err != nil {
-		log.Fatalf("bad path to config: %v", path)
+		log.Fatalf("bad path to config: '%s', mode: %s", path, mode)
 	}
 	var config Config
 	if err := viper.Unmarshal(&config); err != nil {
 		log.Fatalf("YAML parsing error")
 	}
 	return &config
+}
+
+func (conf *Config) GetRedisAddr() string {
+	return conf.Database.Redis.Host + ":" + conf.Database.Redis.Port
 }

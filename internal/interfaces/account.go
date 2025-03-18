@@ -15,7 +15,7 @@ type AccountService interface {
 	GetProfile(id int64) (*pb.GetProfileRes, error)
 	UploadPhoto(userId int64, link string) error
 	DeletePhoto(userId, photoId int64) (string, error)
-	GetMatchingUsers(userId int64, location string) ([]models.GetMatchingUser, error)
+	UpdateLocation(userId int64, location string) error
 }
 type AccountRepository interface {
 	GetById(id int64) *models.User
@@ -28,7 +28,9 @@ type AccountRepository interface {
 	DeletePhoto(photoId int64) error
 	GetPhoto(photoId int64) *models.UserPhoto
 	GetLastUserPhoto(userId int64) *models.UserPhoto
-	GetMatchingUsers(userId int64) ([]models.GetMatchingUser, error)
+	GetDistance(user *models.User) (*float64, error)
+	GetPreferences(userId int64) *models.UserPreferences
+	UpdateLocationRedis(key string, lonLat models.LonLat) error
 }
 
 type AccountSRegisterDeps struct {

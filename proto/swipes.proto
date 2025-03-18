@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+option go_package = "flame/pkg/pb";
+
+service Swipes{
+  rpc CreateOrUpdateSwipe(CreateOrUpdateSwipeReq) returns (CreateOrUpdateSwipeRes);
+  rpc GetUnreadSwipes(GetUnreadSwipesReq) returns (GetUnreadSwipesRes);
+}
+
+message CreateOrUpdateSwipeReq{
+  int64 UserId1 = 1;
+  int64 UserId2 = 2;
+  bool IsLike = 3;
+}
+message CreateOrUpdateSwipeRes{
+}
+
+message GetUnreadSwipesReq{
+  int64 UserId = 1;
+}
+message GetUnreadSwipesRes{
+  repeated int64 UserIds = 1;
+}

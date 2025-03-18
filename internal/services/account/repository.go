@@ -1,6 +1,8 @@
 package account
 
 import (
+	"context"
+	"database/sql"
 	"flame/internal/models"
 	"flame/pkg/db"
 	"fmt"
@@ -8,23 +10,34 @@ import (
 )
 
 type Repository struct {
-	DB *db.DB
+	DB    *db.DB
+	Redis *db.Redis
+}
+type RepositoryDeps struct {
+	DB    *db.DB
+	Redis *db.Redis
 }
 
-func NewRepository(database *db.DB) *Repository {
+func NewRepository(deps *RepositoryDeps) *Repository {
 	return &Repository{
-		DB: database,
+		DB:    deps.DB,
+		Redis: deps.Redis,
 	}
 }
 
 func (repo *Repository) GetById(id int64) *models.User {
 	var user models.User
-	err := repo.DB.Get(&user, `SELECT * FROM users WHERE id=$1`, id)
+	err := repo.DB.Get(&user, `SELECT *,
+      '(' || to_char(ST_X(location::geometry), 'FM999990.000000') || ' ' ||
+            to_char(ST_Y(location::geometry), 'FM999990.000000') || ')'
+    AS location FROM users WHERE id=$1`, id)
+
 	if err != nil {
 		return nil
 	}
 	return &user
 }
+
 func (repo *Repository) GetByEmail(email string) *models.User {
 	var user models.User
 	err := repo.DB.Get(&user, `SELECT * FROM users WHERE email=$1`, email)
@@ -64,7 +77,6 @@ func (repo *Repository) UpdateProfile(user *models.User) error {
 
 	val := reflect.ValueOf(*user)
 	typ := reflect.TypeOf(*user)
-	fmt.Println(user.Location)
 	for i := 0; i < val.NumField(); i++ {
 		fieldType := typ.Field(i)
 		fieldValue := val.Field(i)
@@ -170,6 +182,32 @@ func (repo *Repository) GetLastUserPhoto(userId int64) *models.UserPhoto {
 	return &photo
 }
 
-func (repo *Repository) GetMatchingUsers(userId int64) ([]models.GetMatchingUser, error) {
-	return nil, nil
+func (repo *Repository) GetDistance(user *models.User) (*float64, error) {
+	var distance sql.NullFloat64
+	err := repo.DB.QueryRow(`SELECT CASE WHEN location IS NOT NULL THEN st_distance($1, location) ELSE NULL END FROM users WHERE id=$2`,
+		user.Location, user.Id).Scan(&distance)
+	if err != nil {
+		return nil, err
+	}
+	v, _ := distance.Value()
+	if v == nil {
+		return nil, nil
+	}
+	return &distance.Float64, nil
+}
+func (repo *Repository) GetPreferences(userId int64) *models.UserPreferences {
+	var pref models.UserPreferences
+	err := repo.DB.Get(&pref, `SELECT * FROM preferences WHERE user_id=$1`, userId)
+	if err != nil {
+		return nil
+	}
+	return &pref
+}
+func (repo *Repository) UpdateLocationRedis(key string, lonLat models.LonLat) error {
+	fmt.Println(lonLat.Lon, lonLat.Lat)
+	err := repo.Redis.HSet(context.Background(), key, map[string]interface{}{
+		"lon": lonLat.Lon,
+		"lat": lonLat.Lat,
+	}).Err()
+	return err
 }

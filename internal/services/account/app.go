@@ -13,12 +13,14 @@ type AppDeps struct {
 	Config *config.Config
 	Logger *slog.Logger
 	Db     *db.DB
+	Redis  *db.Redis
 	Mode   string
 }
 type App struct {
 	Config *config.Config
 	Logger *slog.Logger
 	Db     *db.DB
+	Redis  *db.Redis
 	Mode   string
 }
 
@@ -28,6 +30,7 @@ func NewApp(deps *AppDeps) *App {
 		Logger: deps.Logger,
 		Db:     deps.Db,
 		Mode:   deps.Mode,
+		Redis:  deps.Redis,
 	}
 }
 
@@ -43,7 +46,10 @@ func (app *App) Run() error {
 	}
 	defer lis.Close()
 
-	repository := NewRepository(app.Db)
+	repository := NewRepository(&RepositoryDeps{
+		DB:    app.Db,
+		Redis: app.Redis,
+	})
 	service := NewService(&ServiceDeps{
 		Repository: repository,
 		Logger:     app.Logger,

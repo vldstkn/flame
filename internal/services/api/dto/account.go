@@ -40,3 +40,7 @@ type DeletePhotoReq struct {
 type GetMatchingReq struct {
 	Location string `json:"location" validate:"required"`
 }
+
+type UpdateLocation struct {
+	Location string `json:"location" validate:"required"`
+}

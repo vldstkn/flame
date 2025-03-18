@@ -3,8 +3,21 @@ services:
     address: "localhost:7300"
   account:
     address: "localhost:7301"
+  swipes:
+    address: "localhost:7302"
+  matching:
+    address: "localhost:7303"
 database:
-  dsn: "port=5445 host=localhost user=user dbname=flame password=123456 sslmode=disable"
+  account:
+    dsn: "port=5445 host=localhost user=user dbname=account password=123456 sslmode=disable"
+  swipes:
+    dsn: "port=5444 host=localhost user=user dbname=swipe password=123456 sslmode=disable"
+  redis:
+    host: "localhost"
+    port: "6379"
+    password: "123456"
+    username: "default"
+    db: 0
 auth:
   jwt: "token*jwt-!gh"
 public:

@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+option go_package = "flame/pkg/pb";
+
+import "account.proto";
+
+service Matching{
+  rpc GetMatchingUsers(GetMatchingUsersReq) returns (GetMatchingUsersRes);
+}
+
+message UserMatch{
+  int64 Id = 1 [json_name = "id"];
+  string Name = 2 [json_name = "name"];
+  optional int32 Age = 3 [json_name = "age"];
+  optional string City = 4 [json_name = "city"];
+  optional string Gender = 5 [json_name = "gender"];
+  UserPhoto Photo = 6 [json_name = "photo"];
+  int32 Distance = 7 [json_name = "distance"];
+}
+
+message GetMatchingUsersReq{
+  int64 Id = 1;
+  string Location = 2;
+}
+message GetMatchingUsersRes{
+  repeated UserMatch users = 1 [json_name="users"];
+}

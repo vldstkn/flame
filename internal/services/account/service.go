@@ -13,6 +13,7 @@ import (
 	"google.golang.org/grpc/status"
 	"log/slog"
 	"net/http"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -135,30 +136,34 @@ func (service *Service) UpdateProfile(data *pb.UpdateProfileReq) error {
 	if data.Name != nil {
 		name := strings.TrimSpace(*data.Name)
 		if len(name) == 0 {
-			return status.Errorf(codes.InvalidArgument, "name can not be empty")
+			data.Name = nil
+		} else {
+			user.Name = name
 		}
-		user.Name = name
 	}
 	if data.City != nil {
 		city := strings.TrimSpace(*data.City)
 		if len(city) == 0 {
-			return status.Errorf(codes.InvalidArgument, "city can not be empty")
+			data.City = nil
+		} else {
+			user.City = &city
 		}
-		user.City = &city
 	}
 	if data.Bio != nil {
 		bio := strings.TrimSpace(*data.Bio)
 		if len(bio) == 0 {
-			return status.Errorf(codes.InvalidArgument, "bio can not be empty")
+			data.Bio = nil
+		} else {
+			user.Bio = &bio
 		}
-		user.Bio = &bio
 	}
 	if data.Gender != nil {
 		gender := strings.TrimSpace(*data.Gender)
 		if !models.GenderIsValid(*data.Gender) {
-			return status.Errorf(codes.InvalidArgument, "gender is bad")
+			data.Bio = nil
+		} else {
+			user.Gender = &gender
 		}
-		user.Gender = &gender
 	}
 	err := service.Repository.UpdateProfile(user)
 	if err != nil {
@@ -182,6 +187,7 @@ func (service *Service) GetProfile(id int64) (*pb.GetProfileRes, error) {
 			Bio:       user.Bio,
 			Gender:    user.Gender,
 			Photos:    mappers.FromModelPhotosToGrpc(userPhotos),
+			Location:  user.Location,
 		},
 	}, nil
 }
@@ -223,19 +229,73 @@ func (service *Service) DeletePhoto(userId, photoId int64) (string, error) {
 	return photo.PhotoUrl, nil
 }
 
-func (service *Service) GetMatchingUsers(userId int64, location string) ([]models.GetMatchingUser, error) {
-	users, err := service.Repository.GetMatchingUsers(userId)
-	if err != nil {
-		return nil, status.Errorf(codes.Internal, http.StatusText(http.StatusInternalServerError))
+func (service *Service) UpdateLocation(userId int64, location string) error {
+	if location == "" {
+		return status.Errorf(codes.InvalidArgument, http_errors.LocationIsInvalid)
 	}
-	return users, nil
-}
+	user := &models.User{
+		Id:       userId,
+		Location: getLocation(location),
+	}
+	distance, err := service.Repository.GetDistance(user)
+	if err != nil {
+		service.Logger.Error(err.Error(),
+			slog.String("Error location", "service.Repository.GetDistance"),
+			slog.Int64("User id", userId),
+			slog.String("Location", location),
+		)
+		return status.Errorf(codes.Internal, http.StatusText(http.StatusInternalServerError))
+	}
+	pref := service.Repository.GetPreferences(userId)
+	if pref == nil {
+		service.Logger.Error("preference is nil",
+			slog.String("Error location", "service.Repository.GetPreferences"),
+			slog.Int64("User id", userId),
+			slog.String("Location", location),
+		)
+		return status.Errorf(codes.Internal, http.StatusText(http.StatusInternalServerError))
+	}
+	if distance == nil || int(*distance)/1000 >= *pref.Distance {
+		err = service.Repository.UpdateProfile(user)
+		if err != nil {
+			service.Logger.Error(err.Error(),
+				slog.String("Error location", "service.UpdateLocation"),
+				slog.String("Location", location),
+			)
+			return status.Errorf(codes.Internal, http_errors.LocationIsInvalid)
+		}
 
+		//TODO: поиск пользователей
+	}
+	key := fmt.Sprintf("user:%d", userId)
+	lonLat := getLonLat(location)
+	err = service.Repository.UpdateLocationRedis(key, lonLat)
+	if err != nil {
+		service.Logger.Error(err.Error(),
+			slog.String("Error location", "service.Repository.UpdateLocationRedis"),
+			slog.String("Location", location),
+			slog.Float64("Lon", lonLat.Lon),
+			slog.Float64("Lat", lonLat.Lat),
+		)
+	}
+	return nil
+}
 func getLocation(loc string) *string {
 	if loc == "" {
 		return nil
 	} else {
 		l := fmt.Sprintf("SRID=4326;POINT%s", loc)
 		return &l
+	}
+}
+
+func getLonLat(loc string) models.LonLat {
+	loc = loc[1 : len(loc)-1]
+	locArr := strings.Split(loc, " ")
+	lon, _ := strconv.ParseFloat(locArr[0], 64)
+	lat, _ := strconv.ParseFloat(locArr[1], 64)
+	return models.LonLat{
+		Lon: lon,
+		Lat: lat,
 	}
 }

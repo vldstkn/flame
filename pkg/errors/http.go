@@ -10,6 +10,7 @@ const (
 	UserExists            = "user already exists"
 	UserDoesNotExist      = "user already exists"
 	InvalidNameOrPassword = "invalid email or password"
+	LocationIsInvalid     = "location is invalid"
 )
 
 func HandleError(err error) (string, int) {

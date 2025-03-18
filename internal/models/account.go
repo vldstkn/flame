@@ -31,7 +31,18 @@ type UserPhoto struct {
 
 type GetMatchingUser struct {
 	User
-	Photo UserPhoto `json:"photo"`
+	PhotoId  *int64  `db:"photo_id"`
+	PhotoUrl *string `db:"photo_url"`
+	Lon      float64 `db:"lon"`
+	Lat      float64 `db:"lat"`
+}
+
+type UserPreferences struct {
+	UserId   int64   `db:"user_id"`
+	Distance *int    `db:"distance"`
+	Age      *int    `db:"age"`
+	Gender   *string `db:"gender"`
+	City     *string `db:"city"`
 }
 
 func GenderIsValid(str string) bool {

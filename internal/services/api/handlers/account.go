@@ -75,6 +75,7 @@ func NewAccountHandler(router chi.Router, deps *AccountHandlerDeps) error {
 		r.Get("/profile", handler.GetProfile())
 		r.Put("/photo", handler.UploadPhoto())
 		r.Delete("/photo", handler.DeletePhoto())
+		r.Put("/location", handler.UpdateLocation())
 	})
 	return nil
 }
@@ -311,19 +312,19 @@ func (handler *AccountHandler) DeletePhoto() http.HandlerFunc {
 	}
 }
 
-func (handler *AccountHandler) getMatchingUsers() http.HandlerFunc {
+func (handler *AccountHandler) UpdateLocation() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		id := r.Context().Value("authData").(middleware.AuthData).Id
-		body, err := req.HandleBody[dto.GetMatchingReq](r)
+		body, err := req.HandleBody[dto.UpdateLocation](r)
 		if err != nil {
 			res.Json(w, dto.ErrorRes{
 				Error: http.StatusText(http.StatusBadRequest),
 			}, http.StatusBadRequest)
 			return
 		}
-		response, err := handler.AccountClient.GetMatchingUsers(context.Background(), &pb.GetMatchingUsersReq{
-			Id:       id,
+		_, err = handler.AccountClient.UpdateLocation(context.Background(), &pb.UpdateLocationReq{
 			Location: body.Location,
+			UserId:   id,
 		})
 		if err != nil {
 			mes, code := http_errors.HandleError(err)
@@ -332,16 +333,6 @@ func (handler *AccountHandler) getMatchingUsers() http.HandlerFunc {
 			}, code)
 			return
 		}
-		opts := protojson.MarshalOptions{
-			EmitUnpopulated: true,
-		}
-		data, err := opts.Marshal(response)
-		if err != nil {
-			res.Json(w, dto.ErrorRes{
-				Error: http.StatusText(http.StatusInternalServerError),
-			}, http.StatusInternalServerError)
-			return
-		}
-		res.ProtoJson(w, data, http.StatusOK)
+		res.Json(w, nil, http.StatusOK)
 	}
 }

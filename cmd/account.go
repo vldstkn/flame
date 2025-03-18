@@ -5,6 +5,7 @@ import (
 	"flame/internal/services/account"
 	"flame/pkg/db"
 	"flame/pkg/logger"
+	"github.com/go-redis/redis/v8"
 	"log/slog"
 	"os"
 )
@@ -16,11 +17,18 @@ func main() {
 	}
 	conf := config.LoadConfig("configs", mode)
 	log := logger.NewLogger(os.Stdout)
-	database := db.NewDb(conf.Database.Dsn)
+	database := db.NewDb(conf.Database.Account.Dsn)
+	rdb := db.NewRedis(&redis.Options{
+		Addr:     conf.GetRedisAddr(),
+		Password: conf.Database.Redis.Password,
+		DB:       conf.Database.Redis.Db,
+		Username: conf.Database.Redis.Username,
+	})
 	app := account.NewApp(&account.AppDeps{
 		Config: conf,
 		Logger: log,
 		Db:     database,
+		Redis:  rdb,
 		Mode:   mode,
 	})
 	err := app.Run()

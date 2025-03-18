@@ -4,7 +4,6 @@ import (
 	"context"
 	"flame/internal/config"
 	"flame/internal/interfaces"
-	"flame/internal/mappers"
 	"flame/pkg/jwt"
 	"flame/pkg/pb"
 	"log/slog"
@@ -113,12 +112,10 @@ func (handler *Handler) DeletePhoto(ctx context.Context, r *pb.DeletePhotoReq) (
 	}, nil
 }
 
-func (handler *Handler) GetMatchingUsers(ctx context.Context, r *pb.GetMatchingUsersReq) (*pb.GetMatchingUsersRes, error) {
-	users, err := handler.Service.GetMatchingUsers(r.Id, r.Location)
+func (handler *Handler) UpdateLocation(ctx context.Context, r *pb.UpdateLocationReq) (*pb.UpdateLocationRes, error) {
+	err := handler.Service.UpdateLocation(r.UserId, r.Location)
 	if err != nil {
 		return nil, err
 	}
-	return &pb.GetMatchingUsersRes{
-		Users: mappers.FromModelGetMatchingUsersToGrpc(users),
-	}, nil
+	return &pb.UpdateLocationRes{}, nil
 }

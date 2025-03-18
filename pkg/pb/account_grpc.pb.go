@@ -19,14 +19,14 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	Account_Register_FullMethodName         = "/Account/Register"
-	Account_Login_FullMethodName            = "/Account/Login"
-	Account_GetTokens_FullMethodName        = "/Account/GetTokens"
-	Account_UpdateProfile_FullMethodName    = "/Account/UpdateProfile"
-	Account_GetProfile_FullMethodName       = "/Account/GetProfile"
-	Account_UploadPhoto_FullMethodName      = "/Account/UploadPhoto"
-	Account_DeletePhoto_FullMethodName      = "/Account/DeletePhoto"
-	Account_GetMatchingUsers_FullMethodName = "/Account/GetMatchingUsers"
+	Account_Register_FullMethodName       = "/Account/Register"
+	Account_Login_FullMethodName          = "/Account/Login"
+	Account_GetTokens_FullMethodName      = "/Account/GetTokens"
+	Account_UpdateProfile_FullMethodName  = "/Account/UpdateProfile"
+	Account_GetProfile_FullMethodName     = "/Account/GetProfile"
+	Account_UploadPhoto_FullMethodName    = "/Account/UploadPhoto"
+	Account_DeletePhoto_FullMethodName    = "/Account/DeletePhoto"
+	Account_UpdateLocation_FullMethodName = "/Account/UpdateLocation"
 )
 
 // AccountClient is the client API for Account service.
@@ -40,7 +40,7 @@ type AccountClient interface {
 	GetProfile(ctx context.Context, in *GetProfileReq, opts ...grpc.CallOption) (*GetProfileRes, error)
 	UploadPhoto(ctx context.Context, in *UploadPhotoReq, opts ...grpc.CallOption) (*UploadPhotoRes, error)
 	DeletePhoto(ctx context.Context, in *DeletePhotoReq, opts ...grpc.CallOption) (*DeletePhotoRes, error)
-	GetMatchingUsers(ctx context.Context, in *GetMatchingUsersReq, opts ...grpc.CallOption) (*GetMatchingUsersRes, error)
+	UpdateLocation(ctx context.Context, in *UpdateLocationReq, opts ...grpc.CallOption) (*UpdateLocationRes, error)
 }
 
 type accountClient struct {
@@ -121,10 +121,10 @@ func (c *accountClient) DeletePhoto(ctx context.Context, in *DeletePhotoReq, opt
 	return out, nil
 }
 
-func (c *accountClient) GetMatchingUsers(ctx context.Context, in *GetMatchingUsersReq, opts ...grpc.CallOption) (*GetMatchingUsersRes, error) {
+func (c *accountClient) UpdateLocation(ctx context.Context, in *UpdateLocationReq, opts ...grpc.CallOption) (*UpdateLocationRes, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(GetMatchingUsersRes)
-	err := c.cc.Invoke(ctx, Account_GetMatchingUsers_FullMethodName, in, out, cOpts...)
+	out := new(UpdateLocationRes)
+	err := c.cc.Invoke(ctx, Account_UpdateLocation_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -142,7 +142,7 @@ type AccountServer interface {
 	GetProfile(context.Context, *GetProfileReq) (*GetProfileRes, error)
 	UploadPhoto(context.Context, *UploadPhotoReq) (*UploadPhotoRes, error)
 	DeletePhoto(context.Context, *DeletePhotoReq) (*DeletePhotoRes, error)
-	GetMatchingUsers(context.Context, *GetMatchingUsersReq) (*GetMatchingUsersRes, error)
+	UpdateLocation(context.Context, *UpdateLocationReq) (*UpdateLocationRes, error)
 	mustEmbedUnimplementedAccountServer()
 }
 
@@ -174,8 +174,8 @@ func (UnimplementedAccountServer) UploadPhoto(context.Context, *UploadPhotoReq) 
 func (UnimplementedAccountServer) DeletePhoto(context.Context, *DeletePhotoReq) (*DeletePhotoRes, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeletePhoto not implemented")
 }
-func (UnimplementedAccountServer) GetMatchingUsers(context.Context, *GetMatchingUsersReq) (*GetMatchingUsersRes, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetMatchingUsers not implemented")
+func (UnimplementedAccountServer) UpdateLocation(context.Context, *UpdateLocationReq) (*UpdateLocationRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateLocation not implemented")
 }
 func (UnimplementedAccountServer) mustEmbedUnimplementedAccountServer() {}
 func (UnimplementedAccountServer) testEmbeddedByValue()                 {}
@@ -324,20 +324,20 @@ func _Account_DeletePhoto_Handler(srv interface{}, ctx context.Context, dec func
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Account_GetMatchingUsers_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetMatchingUsersReq)
+func _Account_UpdateLocation_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateLocationReq)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(AccountServer).GetMatchingUsers(ctx, in)
+		return srv.(AccountServer).UpdateLocation(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: Account_GetMatchingUsers_FullMethodName,
+		FullMethod: Account_UpdateLocation_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AccountServer).GetMatchingUsers(ctx, req.(*GetMatchingUsersReq))
+		return srv.(AccountServer).UpdateLocation(ctx, req.(*UpdateLocationReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -378,8 +378,8 @@ var Account_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _Account_DeletePhoto_Handler,
 		},
 		{
-			MethodName: "GetMatchingUsers",
-			Handler:    _Account_GetMatchingUsers_Handler,
+			MethodName: "UpdateLocation",
+			Handler:    _Account_UpdateLocation_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

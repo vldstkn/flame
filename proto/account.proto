@@ -10,7 +10,7 @@ service Account{
   rpc GetProfile(GetProfileReq) returns (GetProfileRes);
   rpc UploadPhoto(UploadPhotoReq) returns (UploadPhotoRes);
   rpc DeletePhoto(DeletePhotoReq) returns (DeletePhotoRes);
-  rpc GetMatchingUsers(GetMatchingUsersReq) returns (GetMatchingUsersRes);
+  rpc UpdateLocation(UpdateLocationReq) returns (UpdateLocationRes);
 }
 
 message UserProfile {
@@ -20,7 +20,8 @@ message UserProfile {
   optional string City = 4 [json_name = "city"];
   optional string Bio = 5 [json_name = "bio"];
   optional string Gender = 6 [json_name = "gender"];
-  repeated UserPhoto photos = 7 [json_name = "photos"];
+  optional string Location = 7 [json_name="location"];
+  repeated UserPhoto photos = 8 [json_name = "photos"];
 }
 message UserPhoto {
   int64 Id = 1 [json_name = "id"];
@@ -89,10 +90,9 @@ message DeletePhotoRes{
   string PhotoUrl = 1;
 }
 
-message GetMatchingUsersReq{
-  int64 Id = 1;
-  string Location = 2;
+message UpdateLocationReq{
+  string Location = 1;
+  int64 UserId = 2;
 }
-message GetMatchingUsersRes{
-  repeated UserProfile users = 1;
+message UpdateLocationRes{
 }
