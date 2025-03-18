@@ -80,7 +80,7 @@
 1. **Клонирование репозитория:**
 
    ```bash
-   git clone https://github.com/yourusername/flame.git
+   git clone https://github.com/vldstkn/flame.git
    cd flame
    ```
 2. **Настройка переменных окружения:**
