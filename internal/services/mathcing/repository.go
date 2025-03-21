@@ -27,9 +27,9 @@ func (repo *Repository) GetMatchingUsers(userId int64) ([]models.GetMatchingUser
 		`SELECT u1.id, u1.name, u1.birth_date, u1.city, u1.gender, st_x(ST_AsText(u1.location)::geometry) as lon, st_y(ST_AsText(u1.location)::geometry) as lat, up.photo_url, up.id as photo_id
        			FROM users u
        			JOIN preferences p ON	u.id = p.user_id
-       			JOIN users u1 ON u1.location IS NOT NULL AND st_dwithin(u1.location, u.location, p.distance * 1000) AND
-       			(p.age IS NULL OR (EXTRACT(YEAR FROM AGE(u1.birth_date)) BETWEEN  GREATEST(p.age + ROUND(p.age * 0.8), 16) AND p.age + ROUND(p.age * 1.2)))AND
-						(u1.city IS NULL OR p.city IS NULL OR u1.city = p.city) AND (u1.gender IS NULL OR p.gender IS NULL OR u1.gender = p.gender) AND u.id != u1.id
+       			JOIN users u1 ON u1.location IS NOT NULL AND st_dwithin(u1.location, u.location, p.distance * 1000)  AND
+       			(p.age IS NULL OR (EXTRACT(YEAR FROM AGE(u1.birth_date)) BETWEEN  GREATEST(ROUND(p.age * 0.8), 16) AND GREATEST(ROUND(p.age * 1.2),20) )) AND
+						(p.city IS NULL OR p.city='' OR u1.city = p.city) AND (p.gender IS NULL OR u1.gender = p.gender) AND u.id != u1.id
        			LEFT JOIN user_photos up ON u1.id = up.user_id
        			WHERE u.id=$1`, userId)
 	if err != nil {

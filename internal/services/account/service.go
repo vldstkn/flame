@@ -255,7 +255,7 @@ func (service *Service) UpdateLocation(userId int64, location string) error {
 		)
 		return status.Errorf(codes.Internal, http.StatusText(http.StatusInternalServerError))
 	}
-	if distance == nil || int(*distance)/1000 >= *pref.Distance {
+	if distance == nil || int32(*distance)/1000 >= *pref.Distance {
 		err = service.Repository.UpdateProfile(user)
 		if err != nil {
 			service.Logger.Error(err.Error(),
@@ -298,4 +298,45 @@ func getLonLat(loc string) models.LonLat {
 		Lon: lon,
 		Lat: lat,
 	}
+}
+
+func (service *Service) UpdatePreferences(r *pb.UpdatePreferencesReq) error {
+	user := service.Repository.GetById(r.UserId)
+	if user == nil {
+		return status.Errorf(codes.InvalidArgument, http.StatusText(http.StatusBadRequest))
+	}
+	var pref models.UserPreferences
+	pref.UserId = r.UserId
+	if r.Age != nil && (*r.Age > 110 || *r.Age < 16) {
+		return status.Errorf(codes.InvalidArgument, http_errors.InvalidAge)
+	}
+	pref.Age = r.Age
+
+	if r.Distance != nil && (*r.Distance > 50 || *r.Distance < 3) {
+		return status.Errorf(codes.InvalidArgument, http_errors.InvalidDistance)
+	}
+	pref.Distance = r.Distance
+
+	if r.Gender != nil && !models.GenderIsValid(*r.Gender) {
+		return status.Errorf(codes.InvalidArgument, http_errors.InvalidGender)
+	}
+	pref.Gender = r.Gender
+
+	if r.City != nil && *r.City != "" && len(*r.City) < 2 {
+		return status.Errorf(codes.InvalidArgument, http_errors.InvalidCity)
+	}
+	pref.City = r.City
+
+	if r.Age != nil {
+		if *r.Age > 110 || *r.Age < 16 {
+			return status.Errorf(codes.InvalidArgument, http_errors.InvalidAge)
+		}
+		pref.Age = r.Age
+	}
+
+	err := service.Repository.UpdatePreferences(&pref)
+	if err != nil {
+		return status.Errorf(codes.InvalidArgument, http.StatusText(http.StatusBadRequest))
+	}
+	return nil
 }

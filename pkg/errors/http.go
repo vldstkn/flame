@@ -11,6 +11,10 @@ const (
 	UserDoesNotExist      = "user already exists"
 	InvalidNameOrPassword = "invalid email or password"
 	LocationIsInvalid     = "location is invalid"
+	InvalidAge            = "the age must be more than 16 and less than 110"
+	InvalidDistance       = "the distance must be more than 3 and less than 50"
+	InvalidGender         = "the gender can only be male or female"
+	InvalidCity           = "invalid city"
 )
 
 func HandleError(err error) (string, int) {

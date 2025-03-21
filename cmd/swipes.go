@@ -5,9 +5,10 @@ import (
 	"flame/internal/services/swipes"
 	"flame/pkg/db"
 	"flame/pkg/logger"
-	"github.com/go-redis/redis/v8"
 	"log/slog"
 	"os"
+
+	"github.com/go-redis/redis/v8"
 )
 
 func main() {
@@ -15,6 +16,7 @@ func main() {
 	if mode == "" {
 		mode = "dev"
 	}
+
 	conf := config.LoadConfig("configs", mode)
 	log := logger.NewLogger(os.Stdout)
 	database := db.NewDb(conf.Database.Swipes.Dsn)

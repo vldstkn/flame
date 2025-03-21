@@ -4,15 +4,18 @@ import (
 	"context"
 	"flame/internal/config"
 	"flame/internal/interfaces"
+	grpc_conn "flame/pkg/grpc-conn"
 	"flame/pkg/jwt"
 	"flame/pkg/pb"
+	"google.golang.org/protobuf/types/known/emptypb"
 	"log/slog"
 )
 
 type Handler struct {
-	Logger  *slog.Logger
-	Config  *config.Config
-	Service interfaces.AccountService
+	Logger         *slog.Logger
+	Config         *config.Config
+	Service        interfaces.AccountService
+	MatchingClient pb.MatchingClient
 	pb.UnsafeAccountServer
 }
 
@@ -23,10 +26,21 @@ type HandlerDeps struct {
 }
 
 func NewHandler(deps *HandlerDeps) *Handler {
+	matchConn, err := grpc_conn.NewClientConn(deps.Config.Services.Matching.Address)
+	if err != nil {
+		deps.Logger.Error(err.Error(),
+			slog.String("Error location", "NewAccountHandler.grpc_conn.NewClientConn"),
+			slog.String("Account address", deps.Config.Services.Account.Address),
+		)
+		return nil
+	}
+	matchClient := pb.NewMatchingClient(matchConn)
+
 	return &Handler{
-		Logger:  deps.Logger,
-		Config:  deps.Config,
-		Service: deps.Service,
+		Logger:         deps.Logger,
+		Config:         deps.Config,
+		Service:        deps.Service,
+		MatchingClient: matchClient,
 	}
 }
 
@@ -118,4 +132,13 @@ func (handler *Handler) UpdateLocation(ctx context.Context, r *pb.UpdateLocation
 		return nil, err
 	}
 	return &pb.UpdateLocationRes{}, nil
+}
+
+func (handler *Handler) UpdatePreferences(ctx context.Context, r *pb.UpdatePreferencesReq) (*emptypb.Empty, error) {
+	err := handler.Service.UpdatePreferences(r)
+	if err != nil {
+		return &emptypb.Empty{}, err
+	}
+	_, err = handler.MatchingClient.UpdateRedis(ctx, &pb.UpdateRedisReq{UserId: r.UserId})
+	return &emptypb.Empty{}, err
 }

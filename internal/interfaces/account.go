@@ -16,6 +16,7 @@ type AccountService interface {
 	UploadPhoto(userId int64, link string) error
 	DeletePhoto(userId, photoId int64) (string, error)
 	UpdateLocation(userId int64, location string) error
+	UpdatePreferences(prefer *pb.UpdatePreferencesReq) error
 }
 type AccountRepository interface {
 	GetById(id int64) *models.User
@@ -31,6 +32,7 @@ type AccountRepository interface {
 	GetDistance(user *models.User) (*float64, error)
 	GetPreferences(userId int64) *models.UserPreferences
 	UpdateLocationRedis(key string, lonLat models.LonLat) error
+	UpdatePreferences(prefer *models.UserPreferences) error
 }
 
 type AccountSRegisterDeps struct {

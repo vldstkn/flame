@@ -11,6 +11,7 @@ import (
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
+	emptypb "google.golang.org/protobuf/types/known/emptypb"
 )
 
 // This is a compile-time assertion to ensure that this generated file
@@ -19,14 +20,15 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	Account_Register_FullMethodName       = "/Account/Register"
-	Account_Login_FullMethodName          = "/Account/Login"
-	Account_GetTokens_FullMethodName      = "/Account/GetTokens"
-	Account_UpdateProfile_FullMethodName  = "/Account/UpdateProfile"
-	Account_GetProfile_FullMethodName     = "/Account/GetProfile"
-	Account_UploadPhoto_FullMethodName    = "/Account/UploadPhoto"
-	Account_DeletePhoto_FullMethodName    = "/Account/DeletePhoto"
-	Account_UpdateLocation_FullMethodName = "/Account/UpdateLocation"
+	Account_Register_FullMethodName          = "/Account/Register"
+	Account_Login_FullMethodName             = "/Account/Login"
+	Account_GetTokens_FullMethodName         = "/Account/GetTokens"
+	Account_UpdateProfile_FullMethodName     = "/Account/UpdateProfile"
+	Account_UpdatePreferences_FullMethodName = "/Account/UpdatePreferences"
+	Account_GetProfile_FullMethodName        = "/Account/GetProfile"
+	Account_UploadPhoto_FullMethodName       = "/Account/UploadPhoto"
+	Account_DeletePhoto_FullMethodName       = "/Account/DeletePhoto"
+	Account_UpdateLocation_FullMethodName    = "/Account/UpdateLocation"
 )
 
 // AccountClient is the client API for Account service.
@@ -37,6 +39,7 @@ type AccountClient interface {
 	Login(ctx context.Context, in *LoginReq, opts ...grpc.CallOption) (*LoginRes, error)
 	GetTokens(ctx context.Context, in *GetTokensReq, opts ...grpc.CallOption) (*GetTokensRes, error)
 	UpdateProfile(ctx context.Context, in *UpdateProfileReq, opts ...grpc.CallOption) (*UpdateProfileRes, error)
+	UpdatePreferences(ctx context.Context, in *UpdatePreferencesReq, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	GetProfile(ctx context.Context, in *GetProfileReq, opts ...grpc.CallOption) (*GetProfileRes, error)
 	UploadPhoto(ctx context.Context, in *UploadPhotoReq, opts ...grpc.CallOption) (*UploadPhotoRes, error)
 	DeletePhoto(ctx context.Context, in *DeletePhotoReq, opts ...grpc.CallOption) (*DeletePhotoRes, error)
@@ -91,6 +94,16 @@ func (c *accountClient) UpdateProfile(ctx context.Context, in *UpdateProfileReq,
 	return out, nil
 }
 
+func (c *accountClient) UpdatePreferences(ctx context.Context, in *UpdatePreferencesReq, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(emptypb.Empty)
+	err := c.cc.Invoke(ctx, Account_UpdatePreferences_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *accountClient) GetProfile(ctx context.Context, in *GetProfileReq, opts ...grpc.CallOption) (*GetProfileRes, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(GetProfileRes)
@@ -139,6 +152,7 @@ type AccountServer interface {
 	Login(context.Context, *LoginReq) (*LoginRes, error)
 	GetTokens(context.Context, *GetTokensReq) (*GetTokensRes, error)
 	UpdateProfile(context.Context, *UpdateProfileReq) (*UpdateProfileRes, error)
+	UpdatePreferences(context.Context, *UpdatePreferencesReq) (*emptypb.Empty, error)
 	GetProfile(context.Context, *GetProfileReq) (*GetProfileRes, error)
 	UploadPhoto(context.Context, *UploadPhotoReq) (*UploadPhotoRes, error)
 	DeletePhoto(context.Context, *DeletePhotoReq) (*DeletePhotoRes, error)
@@ -164,6 +178,9 @@ func (UnimplementedAccountServer) GetTokens(context.Context, *GetTokensReq) (*Ge
 }
 func (UnimplementedAccountServer) UpdateProfile(context.Context, *UpdateProfileReq) (*UpdateProfileRes, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateProfile not implemented")
+}
+func (UnimplementedAccountServer) UpdatePreferences(context.Context, *UpdatePreferencesReq) (*emptypb.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdatePreferences not implemented")
 }
 func (UnimplementedAccountServer) GetProfile(context.Context, *GetProfileReq) (*GetProfileRes, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetProfile not implemented")
@@ -270,6 +287,24 @@ func _Account_UpdateProfile_Handler(srv interface{}, ctx context.Context, dec fu
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Account_UpdatePreferences_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdatePreferencesReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AccountServer).UpdatePreferences(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Account_UpdatePreferences_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AccountServer).UpdatePreferences(ctx, req.(*UpdatePreferencesReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _Account_GetProfile_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(GetProfileReq)
 	if err := dec(in); err != nil {
@@ -364,6 +399,10 @@ var Account_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "UpdateProfile",
 			Handler:    _Account_UpdateProfile_Handler,
+		},
+		{
+			MethodName: "UpdatePreferences",
+			Handler:    _Account_UpdatePreferences_Handler,
 		},
 		{
 			MethodName: "GetProfile",

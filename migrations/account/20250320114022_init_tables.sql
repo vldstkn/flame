@@ -1,5 +1,5 @@
-CREATE EXTENSION postgis;
-
+-- +goose Up
+-- +goose StatementBegin
 CREATE TYPE user_gender AS ENUM ('male', 'female');
 CREATE TABLE users(
     id BIGSERIAL PRIMARY KEY,
@@ -31,7 +31,12 @@ CREATE TABLE preferences(
     gender user_gender,
     city TEXT
 );
+-- +goose StatementEnd
 
-TRUNCATE TABLE preferences;
-TRUNCATE TABLE users;
-TRUNCATE TABLE user_photos;
+-- +goose Down
+-- +goose StatementBegin
+DELETE users CASCADE;
+DELETE user_photos CASCADE;
+DELETE preferences CASCADE;
+DELETE TYPE user_gender;
+-- +goose StatementEnd

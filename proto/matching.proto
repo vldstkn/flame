@@ -3,9 +3,11 @@ syntax = "proto3";
 option go_package = "flame/pkg/pb";
 
 import "account.proto";
+import "google/protobuf/empty.proto";
 
 service Matching{
   rpc GetMatchingUsers(GetMatchingUsersReq) returns (GetMatchingUsersRes);
+  rpc UpdateRedis(UpdateRedisReq) returns (google.protobuf.Empty);
 }
 
 message UserMatch{
@@ -24,4 +26,8 @@ message GetMatchingUsersReq{
 }
 message GetMatchingUsersRes{
   repeated UserMatch users = 1 [json_name="users"];
+}
+
+message UpdateRedisReq{
+  int64 UserId = 1;
 }

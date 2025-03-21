@@ -39,8 +39,8 @@ type GetMatchingUser struct {
 
 type UserPreferences struct {
 	UserId   int64   `db:"user_id"`
-	Distance *int    `db:"distance"`
-	Age      *int    `db:"age"`
+	Distance *int32  `db:"distance"`
+	Age      *int32  `db:"age"`
 	Gender   *string `db:"gender"`
 	City     *string `db:"city"`
 }

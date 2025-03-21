@@ -44,3 +44,10 @@ type GetMatchingReq struct {
 type UpdateLocation struct {
 	Location string `json:"location" validate:"required"`
 }
+
+type AccountUpdatePreferencesReq struct {
+	Distance *int32  `json:"distance,omitempty"`
+	Age      *int32  `json:"age,omitempty"`
+	Gender   *string `json:"gender,omitempty"`
+	City     *string `json:"city,omitempty"`
+}

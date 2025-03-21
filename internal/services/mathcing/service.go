@@ -103,3 +103,36 @@ func (service *Service) addUsersToRedis(candidatesKey string, users []models.Get
 	}
 	return nil
 }
+
+func (service *Service) UpdateRedis(userId int64) error {
+	ctx := context.Background()
+	candidatesKey := fmt.Sprintf("user:%d:candidates", userId)
+	lonLat := service.Repository.GetLonLat(userId)
+	if lonLat == nil {
+		service.Logger.Error("lonLat is nil",
+			slog.String("Error location", "service.Repository.GetLonLat"),
+			slog.Int64("UserId", userId))
+		return status.Errorf(codes.Internal, http.StatusText(http.StatusInternalServerError))
+	}
+	err := service.Redis.Del(ctx, candidatesKey).Err()
+	if err != nil {
+		service.Logger.Error(err.Error(),
+			slog.String("Error location", "service.Redis.Del"),
+			slog.String("Key", candidatesKey),
+		)
+		return status.Errorf(codes.Internal, http.StatusText(http.StatusInternalServerError))
+	}
+	users, err := service.Repository.GetMatchingUsers(userId)
+	validUsers := service.Repository.DeleteDuplicateMatch(userId, users)
+	if err != nil {
+		service.Logger.Error(err.Error(),
+			slog.String("Error location", "service.Repository.GetMatchingUsers"),
+		)
+		return status.Errorf(codes.Internal, http.StatusText(http.StatusInternalServerError))
+	}
+	err = service.addUsersToRedis(candidatesKey, validUsers)
+	if err != nil {
+		service.Logger.Error(err.Error(), slog.String("Error location", "service.AddUsersToRedis"))
+	}
+	return nil
+}

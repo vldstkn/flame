@@ -66,6 +66,6 @@ func (repo *Repository) GetSwipeById(userId1, userId2 int64) *models.Swipe {
 }
 
 func (repo *Repository) RemoveSwipeFromRedis(candidateListKey string, userId int64) error {
-	err := repo.Redis.ZRem(context.Background(), candidateListKey, userId).Err()
+	err := repo.Redis.SRem(context.Background(), candidateListKey, userId).Err()
 	return err
 }

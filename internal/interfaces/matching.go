@@ -4,6 +4,7 @@ import "flame/internal/models"
 
 type MatchingService interface {
 	GetMatchingUsers(userId int64, location string) ([]models.GetMatchingUser, *models.LonLat, error)
+	UpdateRedis(userId int64) error
 }
 
 type MatchingRepository interface {

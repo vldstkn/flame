@@ -6,6 +6,7 @@ import (
 	"flame/internal/interfaces"
 	"flame/internal/mappers"
 	"flame/pkg/pb"
+	"google.golang.org/protobuf/types/known/emptypb"
 	"log/slog"
 )
 
@@ -38,4 +39,8 @@ func (handler *Handler) GetMatchingUsers(ctx context.Context, r *pb.GetMatchingU
 	return &pb.GetMatchingUsersRes{
 		Users: mappers.FromModelGetMatchingUsersToGrpc(users, lonLat),
 	}, nil
+}
+func (handler *Handler) UpdateRedis(ctx context.Context, r *pb.UpdateRedisReq) (*emptypb.Empty, error) {
+	err := handler.Service.UpdateRedis(r.UserId)
+	return &emptypb.Empty{}, err
 }

@@ -2,11 +2,14 @@ syntax = "proto3";
 
 option go_package = "flame/pkg/pb";
 
+import "google/protobuf/empty.proto";
+
 service Account{
   rpc Register(RegisterReq) returns (RegisterRes);
   rpc Login(LoginReq) returns (LoginRes);
   rpc GetTokens(GetTokensReq) returns (GetTokensRes);
   rpc UpdateProfile(UpdateProfileReq) returns (UpdateProfileRes);
+  rpc UpdatePreferences(UpdatePreferencesReq) returns(google.protobuf.Empty);
   rpc GetProfile(GetProfileReq) returns (GetProfileRes);
   rpc UploadPhoto(UploadPhotoReq) returns (UploadPhotoRes);
   rpc DeletePhoto(DeletePhotoReq) returns (DeletePhotoRes);
@@ -66,6 +69,7 @@ message UpdateProfileReq{
   optional string Bio = 5;
   optional string Gender = 6;
 }
+
 message UpdateProfileRes{
 }
 
@@ -95,4 +99,12 @@ message UpdateLocationReq{
   int64 UserId = 2;
 }
 message UpdateLocationRes{
+}
+
+message UpdatePreferencesReq{
+  int64 UserId = 1;
+  optional int32 distance = 2;
+  optional int32 age = 3;
+  optional string gender = 4;
+  optional string city = 5;
 }

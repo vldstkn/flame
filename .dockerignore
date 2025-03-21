@@ -1,0 +1,9 @@
+.git
+.gitignore
+.idea
+tmp/
+data/
+**/*.md
+.air
+**/*.log
+**/.DS_Store

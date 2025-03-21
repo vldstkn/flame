@@ -204,10 +204,45 @@ func (repo *Repository) GetPreferences(userId int64) *models.UserPreferences {
 	return &pref
 }
 func (repo *Repository) UpdateLocationRedis(key string, lonLat models.LonLat) error {
-	fmt.Println(lonLat.Lon, lonLat.Lat)
 	err := repo.Redis.HSet(context.Background(), key, map[string]interface{}{
 		"lon": lonLat.Lon,
 		"lat": lonLat.Lat,
 	}).Err()
+	return err
+}
+
+func (repo *Repository) UpdatePreferences(pref *models.UserPreferences) error {
+	flag := false
+	query := "UPDATE preferences SET"
+	count := 1
+
+	var args []interface{}
+
+	val := reflect.ValueOf(*pref)
+	typ := reflect.TypeOf(*pref)
+	for i := 0; i < val.NumField(); i++ {
+		fieldType := typ.Field(i)
+		fieldValue := val.Field(i)
+		if fieldType.Name == "UserId" {
+			continue
+		}
+		if fieldValue.Kind() == reflect.Ptr && !fieldValue.IsNil() {
+			if flag {
+				query += ","
+			} else {
+				flag = true
+			}
+			query += fmt.Sprintf(" %s=$%d", fieldType.Tag.Get("db"), count)
+			args = append(args, fieldValue.Elem().Interface())
+			count++
+
+		}
+	}
+	if !flag {
+		return nil
+	}
+	query += fmt.Sprintf(" WHERE user_id=$%d", count)
+	args = append(args, pref.UserId)
+	_, err := repo.DB.Exec(query, args...)
 	return err
 }

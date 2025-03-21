@@ -13,14 +13,15 @@ import (
 	"flame/pkg/req"
 	"flame/pkg/res"
 	"fmt"
-	"github.com/aws/aws-sdk-go-v2/service/s3"
-	"github.com/aws/aws-sdk-go-v2/service/s3/types"
-	"github.com/go-chi/chi/v5"
-	"google.golang.org/protobuf/encoding/protojson"
 	"log/slog"
 	"net/http"
 	"strings"
 	"time"
+
+	"github.com/aws/aws-sdk-go-v2/service/s3"
+	"github.com/aws/aws-sdk-go-v2/service/s3/types"
+	"github.com/go-chi/chi/v5"
+	"google.golang.org/protobuf/encoding/protojson"
 )
 
 type AccountHandlerDeps struct {
@@ -76,6 +77,7 @@ func NewAccountHandler(router chi.Router, deps *AccountHandlerDeps) error {
 		r.Put("/photo", handler.UploadPhoto())
 		r.Delete("/photo", handler.DeletePhoto())
 		r.Put("/location", handler.UpdateLocation())
+		r.Put("/prefer", handler.UpdatePreferences())
 	})
 	return nil
 }
@@ -266,6 +268,7 @@ func (handler *AccountHandler) UploadPhoto() http.HandlerFunc {
 				uniqueFileName),
 		})
 		if err != nil {
+			handler.Logger.Error(err.Error(), slog.String("Error location", "AccountHandler.UploadPhoto"))
 			msg, code := http_errors.HandleError(err)
 			res.Json(w, dto.ErrorRes{
 				Error: msg,
@@ -325,6 +328,35 @@ func (handler *AccountHandler) UpdateLocation() http.HandlerFunc {
 		_, err = handler.AccountClient.UpdateLocation(context.Background(), &pb.UpdateLocationReq{
 			Location: body.Location,
 			UserId:   id,
+		})
+		if err != nil {
+			mes, code := http_errors.HandleError(err)
+			res.Json(w, dto.ErrorRes{
+				Error: mes,
+			}, code)
+			return
+		}
+		res.Json(w, nil, http.StatusOK)
+	}
+}
+
+func (handler *AccountHandler) UpdatePreferences() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		userId := r.Context().Value("authData").(middleware.AuthData).Id
+		body, err := req.HandleBody[dto.AccountUpdatePreferencesReq](r)
+		if err != nil {
+			res.Json(w, dto.ErrorRes{
+				Error: err.Error(),
+			}, http.StatusBadRequest)
+			return
+		}
+		ctx := context.Background()
+		_, err = handler.AccountClient.UpdatePreferences(ctx, &pb.UpdatePreferencesReq{
+			UserId:   userId,
+			Distance: body.Distance,
+			Age:      body.Age,
+			Gender:   body.Gender,
+			City:     body.City,
 		})
 		if err != nil {
 			mes, code := http_errors.HandleError(err)

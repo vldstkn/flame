@@ -14,16 +14,16 @@ type HandlersDeps struct {
 }
 
 func InitHandlers(router chi.Router, deps *HandlersDeps) {
-	NewAccountHandler(router, &AccountHandlerDeps{
+	_ = NewAccountHandler(router, &AccountHandlerDeps{
 		Logger:     deps.Logger,
 		Config:     deps.Config,
 		ApiService: deps.ApiService,
 	})
-	NewMatchingHandler(router, &MatchingHandlerDeps{
+	_ = NewMatchingHandler(router, &MatchingHandlerDeps{
 		Logger: deps.Logger,
 		Config: deps.Config,
 	})
-	NewSwipesHandler(router, &SwipesHandlerDeps{
+	_ = NewSwipesHandler(router, &SwipesHandlerDeps{
 		Logger: deps.Logger,
 		Config: deps.Config,
 	})

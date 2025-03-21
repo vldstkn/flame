@@ -1,0 +1,75 @@
+version: "3.9"
+name: "flame"
+services:
+  api:
+    build:
+      context: ../
+      dockerfile: deployments/api/Dockerfile
+    ports:
+      - "7300:7300"
+    environment:
+      - APP_ENV=prod
+    networks:
+      - backend
+  account:
+    build:
+      context: ../
+      dockerfile: deployments/account/Dockerfile
+    environment:
+      - APP_ENV=prod
+    networks:
+      - backend
+  swipes:
+    build:
+      context: ../
+      dockerfile: deployments/swipes/Dockerfile
+    environment:
+      - APP_ENV=prod
+    networks:
+      - backend
+  matching:
+    build:
+      context: ../
+      dockerfile: deployments/matching/Dockerfile
+    environment:
+      - APP_ENV=prod
+    networks:
+      - backend
+  pg-account:
+    image: postgis/postgis:17-3.5
+    restart: always
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: 123456
+      POSTGRES_DB: account
+    ports:
+      - "5445:5432"
+    networks:
+      - backend
+    volumes:
+      - ./data/account:/var/lib/postgresql/data
+      - ./init/account:/docker-entrypoint-initdb.d
+  pg-swipe:
+    image: postgres:latest
+    restart: always
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: 123456
+      POSTGRES_DB: swipe
+    ports:
+      - "5444:5432"
+    networks:
+      - backend
+    volumes:
+      - ./data/swipe:/var/lib/postgresql/data
+      - ./init/swipe:/docker-entrypoint-initdb.d
+  redis:
+    image: redis:latest
+    ports:
+      - "6379:6379"
+
+networks:
+  backend:
+    driver: bridge
+volumes:
+  pgdata:

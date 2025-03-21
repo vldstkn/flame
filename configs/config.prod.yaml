@@ -1,0 +1,28 @@
+services:
+  api:
+    address: "api:7300"
+  account:
+    address: "account:7301"
+  swipes:
+    address: "swipes:7302"
+  matching:
+    address: "matching:7303"
+database:
+  account:
+    dsn: "port=5432 host=pg-account user=user dbname=account password=123456 sslmode=disable"
+  swipes:
+    dsn: "port=5432 host=pg-swipe user=user dbname=swipe password=123456 sslmode=disable"
+  redis:
+    host: "redis"
+    port: "6379"
+    password: "123456"
+    username: "default"
+    db: 0
+auth:
+  jwt: "token*jwt-!gh"
+public:
+  host : "localhost"
+  port :  7300
+s3:
+  bucket: "flame-dev"
+  endpoint: "https://hb.ru-msk.vkcloud-storage.ru"
